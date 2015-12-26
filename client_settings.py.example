@@ -1,0 +1,2 @@
+# The URL of your server
+URL_BASE="http://your_url_here:port_number"

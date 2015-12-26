@@ -1,0 +1,2 @@
+# Set this to the address of your Bluetooth LE device
+btle_address = "Your:Address:Here"

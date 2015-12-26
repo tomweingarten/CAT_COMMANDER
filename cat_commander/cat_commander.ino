@@ -11,7 +11,6 @@
 
 // Pins
 #define DHTPIN 2
-int ir_led_pin = 3;
 
 //int visor_led_pin = 5; // Temporarily disabling this
 // Pins 7-9 are used for Bluetooth LE (but 9 is optional RST)
@@ -50,7 +49,7 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 void setup() {
   while (!Serial); // required for Flora & Micro (apparently)
   Serial.begin(115200);
-  //Serial.println("Arduino is go.\n\nCAT COMMANDER ACTIVATE.");
+  Serial.println("Arduino is go.\n\nCAT COMMANDER ACTIVATE.");
   
   // put your setup code here, to run once:
   pinMode(laser0_pin, OUTPUT);

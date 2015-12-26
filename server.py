@@ -3,14 +3,12 @@ from flask import Flask, request, session, g, redirect, url_for, \
 import time
 from bluepy import btle
 import logging
+import server_settings
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 # WARNING: For some reason, setting Flask DEBUG=True causes btle to fail
 app.config["PROPOGATE_EXCEPTIONS"] = True
-
-# Set this to the address of your Bluetooth LE device
-btle_address = "Your:Address:Here"
 
 # Log to stdout
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
@@ -94,7 +92,7 @@ class MyDelegate(btle.DefaultDelegate):
 def load_temperature():
     # Tell the BTLE we want to receive the temperature
     btle_write('get temperature\n');
-    if p.waitForNotifications(1.0):
+    if p and p.waitForNotifications(1.0):
         global notification_data
         global temperature
         temperature = float(notification_data)
@@ -107,7 +105,7 @@ def load_temperature():
 def load_visor_status():
     # Tell the BTLE we want to receive the status of the visor
     btle_write('get visor_status\n');
-    if p.waitForNotifications(1.0):
+    if p and p.waitForNotifications(1.0):
         global notification_data
         global visor_status
         visor_status = bool(notification_data)
@@ -117,7 +115,7 @@ def load_visor_status():
     # There was some problem loading the data
     visor_status = False
 
-def btle_write(data):
+def btle_write(data, retry=0):
     try:
         # write data in 10 character chunks
         length = 20
@@ -127,6 +125,9 @@ def btle_write(data):
     except:
         # Something went wrong, try to re-establish the connection
         btle_connect()
+        # Retry the connection
+        if retry < 3:
+            btle_write(data, retry=retry+1)
 
 def btle_connect():
     global p
@@ -134,7 +135,11 @@ def btle_connect():
     global rx_uuid
     global tx
     global rx
-    p = btle.Peripheral(btle_address,"random")
+    try:
+        p = btle.Peripheral(server_settings.btle_address,"random")
+    except btle.BTLEException as exc:
+        print "Error connecting to BTLE device: " + exc.message
+        return False
     tx_uuid = btle.UUID("6e400002-b5a3-f393-e0a9-e50e24dcca9e")
     rx_uuid = btle.UUID("6e400003-b5a3-f393-e0a9-e50e24dcca9e")
     tx = p.getCharacteristics(uuid=tx_uuid)[0]
@@ -142,6 +147,7 @@ def btle_connect():
     p.setDelegate( MyDelegate({}) )
     # Tell BTLE to accept notifications by sending 0x0100 to the CCCD
     p.writeCharacteristic(0x0023, '\x01\x00', False)
+    return True
 
 btle_connect()
 

@@ -3,12 +3,7 @@ import signal
 import sys
 from nunchuck import nunchuck
 import requests
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BCM)
-
-# Constants
-URL_BASE="http://your_url_here:port_number"
+import client_settings
 
 # Initialize the Wii Nunchuck
 wii = nunchuck()
