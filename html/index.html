@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>CAT COMMANDER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.0.1/css/foundation.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.0.1/js/foundation.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.0/pep.js"></script>
+
+    <style>
+		.laser_control {
+			overflow	: hidden;
+            background-color : lightblue;
+            border: 1px solid darkgrey;
+            border-radius: 25px;
+			-webkit-user-select	: none;
+			-moz-user-select	: none;
+		}
+    </style>
+</head>
+<body>
+  <div class="row">
+    <div class="large-12 columns">
+        <h1>CAT COMMANDER</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-3 medium-4 small-6 columns">
+      Server Address
+    </div>
+    <div class="large-3 medium-4 small-6 columns end">
+      <input id='ip-address' placeholder="192.168.1.7:80"/>
+    </div>
+  </div>
+  <br/>
+  <div class="row">
+      <div id="laser0_control" class="laser_control small-4 small-offset-1 medium-3 medium-offset-1 large-2 large-offset-0 columns">
+      </div>
+      <div id="laser1_control" class="laser_control small-4 small-offset-1 medium-3 medium-offset-1 large-2 large-offset-1 columns end">
+      </div>
+  </div>
+  <div class="row">
+      <div style="text-align: center;" class="small-4 small-offset-1 medium-3 medium-offset-1 large-2 large-offset-0 columns">
+        Laser 0
+      </div>
+      <div style="text-align: center;" class="small-4 small-offset-1 medium-3 medium-offset-1 large-2 large-offset-1 columns end">
+        Laser 1
+      </div>
+  </div>
+
+  <script>
+        alreadySent = false;
+        function get_laser_id(e) {
+            if (e.target.id == 'laser0_control') {
+                return 0;
+            }else{
+                return 1;
+            }
+        }
+        function handleResize() {
+            $('.laser_control').each(function(key, box) {
+                console.log($(box));
+                console.log($(box).width());
+                $(box).height($(box).width());
+            });
+        }
+
+        $('.laser_control').on('pointermove', function(e) {
+            // Move the laser
+            laser_id = get_laser_id(e);
+            offset = $(e.target).offset();
+            if (e.buttons > 0) {
+                // If the button is held down or touch is pressed, send an update
+                X = e.clientX - offset.left;
+                Y = e.clientY - offset.top;
+                X = Math.round((X/100.0)*180.0);
+                Y = Math.round((Y/100.0)*180.0);
+                if (alreadySent) {
+                    console.log("Not sending double request");
+                    return;
+                }
+                inFlight = true; // Only send one position update at a time
+                $.ajax({
+                    type: "GET",
+                    url: URL_BASE+'/api/v1/laser_position/?id='+laser_id+'&x=' + X + '&y=' + Y,
+                    success: function (html) {
+                        // Set variable to false
+                        inFlight = false;
+                    },
+                    error: function () {
+                        // Set variable to false
+                        inFlight = false;
+                    }
+                });
+            }
+        });
+        $('.laser_control').on('pointerdown', function(e) {
+            // Turn the laser on
+            laser_id = get_laser_id(e);
+            $.ajax(URL_BASE+'/api/v1/laser/?id='+laser_id+'&status=1');
+        });
+        $('.laser_control').on('pointerup pointerout pointercancel pointerleave', function(e) {
+            // Turn the laser off
+            laser_id = get_laser_id(e);
+            $.ajax(URL_BASE+'/api/v1/laser/?id='+laser_id+'&status=0');
+        });
+        $('#ip-address').on('change', function () {
+            // Update the host address
+            window.baseURL="http://"+$(this).val()+"/";
+        });
+        $(window).on('resize',function() {
+            // Redraw the control boxes
+            handleResize();
+        });
+        handleResize();
+  </script>
+</body>
+</html>

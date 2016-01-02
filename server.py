@@ -35,11 +35,18 @@ response_suffix = """
 </body>
 """
 
+def cors(response):
+    # Allow AJAX interactions from other domains
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
+
 @app.route('/')
 def main():
     response = response_prefix
     response += "<h1>WELCOME TO CAT COMMANDER</h1>"
-    # Get data from Bluetooth
+    # Get data from Blucetooth
     load_temperature()
     load_visor_status()
     if temperature != None:
@@ -62,7 +69,7 @@ def v1_laser():
     laser_status = request.args.get('status', 0, type=int)
     # Communicate the status to BTLE
     btle_write('laser %d %d\n'%(laser_id, laser_status));
-    return Response({"success": True}, status=200, mimetype='application/json')
+    return cors(Response({"success": True}, status=200, mimetype='application/json'))
 
 
 @app.route('/api/v1/laser_position/')
@@ -73,7 +80,7 @@ def v1_laser_position():
     laser_y = request.args.get('y', 0, type=int)
     # Communicate the new position to BTLE
     btle_write('laser_position %d %d %d\n'%(laser_id, laser_x, laser_y));
-    return Response({"success": True}, status=200, mimetype='application/json')
+    return cors(Response({"success": True}, status=200, mimetype='application/json'))
 
 
 class MyDelegate(btle.DefaultDelegate):
@@ -154,4 +161,4 @@ btle_connect()
 # Run server as a standalone app
 if __name__ == '__main__':
     print "Beginning server"
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=80)
