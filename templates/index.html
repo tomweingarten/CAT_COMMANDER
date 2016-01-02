@@ -83,7 +83,7 @@
                 inFlight = true; // Only send one position update at a time
                 $.ajax({
                     type: "GET",
-                    url: URL_BASE+'/api/v1/laser_position/?id='+laser_id+'&x=' + X + '&y=' + Y,
+                    url: URL_BASE+'api/v1/laser_position/?id='+laser_id+'&x=' + X + '&y=' + Y,
                     success: function (html) {
                         // Set variable to false
                         inFlight = false;
@@ -98,12 +98,12 @@
         $('.laser_control').on('pointerdown', function(e) {
             // Turn the laser on
             laser_id = get_laser_id(e);
-            $.ajax(URL_BASE+'/api/v1/laser/?id='+laser_id+'&status=1');
+            $.ajax(URL_BASE+'api/v1/laser/?id='+laser_id+'&status=1');
         });
         $('.laser_control').on('pointerup pointerout pointercancel pointerleave', function(e) {
             // Turn the laser off
             laser_id = get_laser_id(e);
-            $.ajax(URL_BASE+'/api/v1/laser/?id='+laser_id+'&status=0');
+            $.ajax(URL_BASE+'api/v1/laser/?id='+laser_id+'&status=0');
         });
         $('#ip-address').on('change', function () {
             // Update the host address
