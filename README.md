@@ -27,7 +27,7 @@ The __*CAT COMMANDER*__ is the premier dual-laser solution for remote cat entert
 1. Foam core (optional) - http://amzn.to/1muOxYB
 1. Weights (optional) - http://amzn.to/1muOAU5
 
-## Client (Optional)
+## Nunchuck client (Optional)
 
 1. Raspberry Pi - https://www.adafruit.com/products/2471
 1. Power supply - https://www.adafruit.com/products/1995

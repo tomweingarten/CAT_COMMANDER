@@ -1,5 +1,5 @@
 from flask import Flask, request, session, g, redirect, url_for, \
-     abort, render_template, flash, Response
+     abort, render_template, flash, Response, send_from_directory
 import time
 from bluepy import btle
 import logging
@@ -44,23 +44,7 @@ def cors(response):
 
 @app.route('/')
 def main():
-    response = response_prefix
-    response += "<h1>WELCOME TO CAT COMMANDER</h1>"
-    # Get data from Blucetooth
-    load_temperature()
-    load_visor_status()
-    if temperature != None:
-        response += "The temperature in the apartment is %lfF<br/>" % temperature
-    else:
-        response += "There was a problem loading the temperature from the Arduino<br/><br/>"
-    if visor_status == True:
-        response += "The visor is open"
-    elif visor_status == False:
-        response += "The visor is closed"
-    else:
-        response += "There was a problem loading the visor status from the Arduino<br/><br/>"
-    response += response_suffix
-    return response
+    return render_template('index.html')
 
 @app.route('/api/v1/laser/')
 def v1_laser():
